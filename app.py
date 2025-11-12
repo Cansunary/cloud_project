@@ -33,7 +33,7 @@ li { background: white; margin: 5px auto; width: 200px; padding: 8px; border-rad
 <h3>Ziyaretçiler:</h3>
 <ul>
   {% for isim, sehir in ziyaretciler %}
-    <li>**Selam!** {{ isim }}'e {{ sehir }}'den sevgiler.</li><li>{{ isim }} ({{ sehir }})</li>
+    <li>Selam! Ben {{ isim }} {{ sehir }}'den sevgiler.</li><li>{{ isim }} ({{ sehir }})</li>
   {% endfor %}
 </ul>
 </body>
