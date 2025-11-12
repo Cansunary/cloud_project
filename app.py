@@ -23,7 +23,7 @@ li { background: white; margin: 5px auto; width: 200px; padding: 8px; border-rad
 </head>
 
 <body>
-<h1>Buluttan Selam!</h1>
+<h1>Ziyaretçi Defteri</h1>
 <p>Adını yaz, selamını bırak!</p>
 <form method="POST">
   <input type="text" name="isim" placeholder="Adını yaz" required>
