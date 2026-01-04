@@ -38,7 +38,8 @@ def index():
     cur = conn.cursor()
     
     # 1. Tabloyu oluştur ve MÜHÜRLE (commit)
-    cur.execute("CREATE TABLE IF NOT EXISTS ziyaretciler (id SERIAL PRIMARY KEY, isim TEXT, sehir TEXT)")
+     cur.execute("DROP TABLE IF EXISTS ziyaretciler")
+    cur.execute("CREATE TABLE ziyaretciler (id SERIAL PRIMARY KEY, isim TEXT, sehir TEXT)")
     conn.commit()
 
     # 2. Eğer form gönderildiyse veriyi kaydet
