@@ -41,7 +41,7 @@ li { background: white; margin: 5px auto; width: 200px; padding: 8px; border-rad
 """
 
 def connect_db():
-  conn = psycopg2.connect(DATABASE_URL)
+ conn = psycopg2.connect(DATABASE_URL, sslmode='require')
   return conn
 
 @app.route("/", methods=["GET", "POST"])
