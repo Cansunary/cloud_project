@@ -6,6 +6,7 @@ app = Flask(__name__)
 
 DATABASE_URL = os.getenv("DATABASE_URL","postgresql://cansu:9jSZui0vOmWIgRptyHlWgKpeTSisfBA8@dpg-d5da5eeuk2gs738s33u0-a.oregon-postgres.render.com/cloud_db_d492")
 
+
 HTML = """
 <!doctype html>
 <html>
@@ -48,7 +49,9 @@ def connect_db():
 def index():
   conn = connect_db()
   cur = conn.cursor()
-  cur.execute("CREATE TABLE IF NOT EXISTS ziyaretciler (id SERIAL PRIMARY KEY, isim TEXT, sehir TEXT)")
+  cur.execute("DROP TABLE IF EXISTS ziyaretciler")
+  cur.execute("CREATE TABLE ziyaretciler (id SERIAL PRIMARY KEY, isim TEXT, sehir TEXT)")
+  conn.commit()
 
 
   if request.method == "POST":
