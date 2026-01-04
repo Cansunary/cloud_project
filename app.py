@@ -1,63 +1,67 @@
+from flask import Flask, render_template_string, request
 import os
 import psycopg2
-from flask import Flask, request, render_template_string
 
 app = Flask(__name__)
 
-# Render'dan gelen veritabanı URL'sini al
-DATABASE_URL = os.environ.get('DATABASE_URL')
+# Render'ın otomatik tanımladığı veritabanı bağlantı bilgisi (DATABASE_URL ortam değişkeni)
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://cansu:9jSZui0vOmWIgRptyHlWgKpeTSisfBA8@dpg-d5da5eeuk2gs738s33u0-a.oregon-postgres.render.com/cloud_db_d492")
 
+# HTML ŞABLONU (tek sayfada form + liste)
 HTML = """
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head><title>Ziyaretçi Defteri</title></head>
+<head>
+    <title>Buluttan Selam!</title>
+    <style>
+        body { font-family: Arial; text-align: center; padding: 50px; background: #eef2f3; }
+        h1 { color: #333; }
+        form { margin: 20px auto; }
+        input { padding: 10px; font-size: 16px; }
+        button { padding: 10px 15px; background: #4CAF50; color: white; border: none; border-radius: 6px; cursor: pointer; }
+        ul { list-style: none; padding: 0; }
+        li { background: white; margin: 5px auto; width: 200px; padding: 8px; border-radius: 5px; }
+    </style>
+</head>
 <body>
+    <h1>☁️ Buluttan Selam!</h1>
+    <p>Adını yaz, selamını bırak 👇</p>
     <form method="POST">
-        İsim: <input type="text" name="isim"><br>
-        Şehir: <input type="text" name="sehir"><br>
-        <input type="submit" value="Gönder">
+        <input type="text" name="isim" placeholder="Adını yaz" required>
+        <button type="submit">Gönder</button>
     </form>
     <h3>Ziyaretçiler:</h3>
     <ul>
-    {% for isim, sehir in ziyaretciler %}
-        <li>Selam! Ben {{ isim }}, {{ sehir }}'den sevgiler.</li>
-    {% endfor %}
+        {% for ad in isimler %}
+            <li>{{ ad }}</li>
+        {% endfor %}
     </ul>
 </body>
 </html>
 """
 
 def connect_db():
-    # Render PostgreSQL için sslmode='require' zorunludur
-    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    conn = psycopg2.connect(DATABASE_URL)
     return conn
 
 @app.route("/", methods=["GET", "POST"])
 def index():
     conn = connect_db()
     cur = conn.cursor()
+    cur.execute("CREATE TABLE IF NOT EXISTS ziyaretciler (id SERIAL PRIMARY KEY, isim TEXT)")
     
-    # 1. Tabloyu oluştur ve MÜHÜRLE (commit)
-     cur.execute("DROP TABLE IF EXISTS ziyaretciler")
-    cur.execute("CREATE TABLE ziyaretciler (id SERIAL PRIMARY KEY, isim TEXT, sehir TEXT)")
-    conn.commit()
-
-    # 2. Eğer form gönderildiyse veriyi kaydet
     if request.method == "POST":
         isim = request.form.get("isim")
-        sehir = request.form.get("sehir")
-        if isim and sehir:
-            cur.execute("INSERT INTO ziyaretciler (isim, sehir) VALUES (%s, %s)", (isim, sehir))
+        if isim:
+            cur.execute("INSERT INTO ziyaretciler (isim) VALUES (%s)", (isim,))
             conn.commit()
-
-    # 3. Verileri veritabanından çek (Hata aldığın "sehir" sütunu burada çekiliyor)
-    cur.execute("SELECT isim, sehir FROM ziyaretciler ORDER BY id DESC LIMIT 10")
-    ziyaretciler = cur.fetchall()
-
+    
+    cur.execute("SELECT isim FROM ziyaretciler ORDER BY id DESC LIMIT 10")
+    isimler = [row[0] for row in cur.fetchall()]
+    
     cur.close()
     conn.close()
-    
-    return render_template_string(HTML, ziyaretciler=ziyaretciler)
+    return render_template_string(HTML, isimler=isimler)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
