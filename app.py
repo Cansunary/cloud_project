@@ -28,7 +28,7 @@ HTML = """
 """
 
 def connect_db():
-    # sslmode='require' Render PostgreSQL için zorunludur
+    # Render PostgreSQL için sslmode='require' zorunludur
     conn = psycopg2.connect(DATABASE_URL, sslmode='require')
     return conn
 
@@ -41,6 +41,7 @@ def index():
     cur.execute("CREATE TABLE IF NOT EXISTS ziyaretciler (id SERIAL PRIMARY KEY, isim TEXT, sehir TEXT)")
     conn.commit()
 
+    # 2. Eğer form gönderildiyse veriyi kaydet
     if request.method == "POST":
         isim = request.form.get("isim")
         sehir = request.form.get("sehir")
@@ -48,12 +49,13 @@ def index():
             cur.execute("INSERT INTO ziyaretciler (isim, sehir) VALUES (%s, %s)", (isim, sehir))
             conn.commit()
 
-    # 2. Verileri çek
+    # 3. Verileri veritabanından çek (Hata aldığın "sehir" sütunu burada çekiliyor)
     cur.execute("SELECT isim, sehir FROM ziyaretciler ORDER BY id DESC LIMIT 10")
     ziyaretciler = cur.fetchall()
 
     cur.close()
     conn.close()
+    
     return render_template_string(HTML, ziyaretciler=ziyaretciler)
 
 if __name__ == "__main__":
